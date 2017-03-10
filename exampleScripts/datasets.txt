@@ -1,0 +1,29 @@
+# CREATE
+echo '{ "name": "Smoke Test DataSet", "description": "FTW!", "schema": { "columns":[{ "type":"STRING", "name":"name" }] }}' \
+ | http --body POST https://api.dev.domo.com/v1/datasets Authorization:"bearer $ACCESS_TOKEN"
+
+
+# GET
+http -v https://api.dev.domo.com/v1/datasets/$DATASET Authorization:"bearer $ACCESS_TOKEN"
+
+
+# UPDATE
+echo '{ "name": "Smoke Test DataSet Update", "description": "FTW! FTW! Updated", "schema": { "columns":[{ "type":"STRING", "name":"1st Letters" }, { "type":"STRING", "name":"2nd Letters" }, { "type":"STRING", "name":"3rd Letters" }] }}' \
+  | http -v PUT https://api.dev.domo.com/v1/datasets/$DATASET Authorization:"bearer $ACCESS_TOKEN"
+
+
+# UPLOAD DATA
+printf '"a","b","c"\n"d","e","f"\n"g","h","i"\n"j","k","l"\n"m","n","o"\n"p","q","r"' \
+  | http -v PUT https://api.dev.domo.com/v1/datasets/$DATASET/data Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
+
+
+# DOWNLOAD DATA
+http -v https://api.dev.domo.com/v1/datasets/$DATASET/data Accept:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
+
+
+# DELETE DATASET
+http -v DELETE https://api.dev.domo.com/v1/datasets/$DATASET Authorization:"bearer $ACCESS_TOKEN"
+
+
+# LIST DATASET
+http -v https://api.dev.domo.com/v1/datasets limit==1 offset==1 Authorization:"bearer $ACCESS_TOKEN"

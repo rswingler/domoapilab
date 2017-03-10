@@ -1,0 +1,47 @@
+# CREATE A STREAM
+STREAM=`echo '{ "updateMethod": "REPLACE", "dataSet": {"name": "Smoke Test DataSet", "description": "Such dataset.", "schema": {"columns": [{"type": "STRING", "name":"name"}]}}}' \
+ | http --body POST https://api.dev.domo.com/v1/streams Authorization:"bearer $ACCESS_TOKEN" | jq -r '.id'`
+
+
+# GET A STREAM
+http -v https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+
+
+# UPDATE A STREAM
+echo '{ "updateMethod": "APPEND", "dataSet": {"name": "Smoke Test DataSet", "description": "Such dataset.", "schema": {"columns": [{"type": "STRING", "name":"name"}]}}}' \
+  | http -v PUT https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+
+
+# PATCH A STREAM
+echo '{ "updateMethod": "REPLACE" }' \
+   | http -v PATCH https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+
+
+# CREATE AN EXECUTION
+EXECUTION=`http --body POST $API_HOST/v1/streams/$STREAM/executions Authorization:"bearer $ACCESS_TOKEN" | jq -r '.id'`
+
+
+# GET AN EXECUTION
+http -v $API_HOST/v1/streams/$STREAM/executions/$EXECUTION Authorization:"bearer $ACCESS_TOKEN"
+
+
+# UPLOAD TEXT PART
+printf '"Obi-Wan"\n"Luke"\n"Leia"' \
+    | http -v PUT $API_HOST/v1/streams/$STREAM/executions/$EXECUTION/part/1 Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
+
+
+# GZIP UPLOAD PART
+printf '"Maul"\n"Vader"\n"Sidious"' \
+    | gzip -c | http -v PUT $API_HOST/v1/streams/$STREAM/executions/$EXECUTION/part/2 Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
+
+
+# COMMIT AN EXECUTION
+http -v PUT $API_HOST/v1/streams/$STREAM/executions/$EXECUTION/commit Authorization:"bearer $ACCESS_TOKEN"
+
+
+# DELETE A STREAM
+http -v DELETE https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+
+
+# LIST
+http -v https://api.dev.domo.com/v1/streams Authorization:"bearer $ACCESS_TOKEN"

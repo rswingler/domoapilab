@@ -1,0 +1,2 @@
+http --body https://api.dev.domo.com/oauth/token grant_type==client_credentials scope=="data user" -a $CLIENT_ID:$CLIENT_SECRET
+ 
