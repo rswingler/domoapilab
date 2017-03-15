@@ -1,25 +1,25 @@
 # CREATE
-http -v https://api.dev.domo.com/v1/users Authorization:"bearer $ACCESS_TOKEN" \
+http -v https://api.domo.com/v1/users Authorization:"bearer $ACCESS_TOKEN" \
   name="API Smoke Test" email="api.smoke.test@domo.com" role="Admin"
 
 
 # GET
-http -v https://api.dev.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN"
+http -v https://api.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN"
 
 
 # UPDATE A USER
-http -v PUT https://api.dev.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN" \
+http -v PUT https://api.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN" \
   name="API Smoke Test" title="Important Title" email="api.smoke.test@domo.com" role="Admin"
 
 
 # PATCH
-http -v PATCH https://api.dev.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN" \
+http -v PATCH https://api.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN" \
   title="Super Important Title"
 
 
 # DELETE
-http -v DELETE https://api.dev.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN"
+http -v DELETE https://api.domo.com/v1/users/$USER Authorization:"bearer $ACCESS_TOKEN"
 
 
 # LIST
-http -v https://api.dev.domo.com/v1/users limit==10 offset==0 Authorization:"bearer $ACCESS_TOKEN"
+http -v https://api.domo.com/v1/users limit==10 offset==0 Authorization:"bearer $ACCESS_TOKEN"

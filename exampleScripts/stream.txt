@@ -1,47 +1,115 @@
+# CREATE YOUR OAUTH CLIENT / GET YOUR CLIENT ID AND SECRET
+  # Log in to developer.domo.com using "education.domo.com" as your environment
+  # Hover over "My Account" and click "New Client"
+  # Enter a name and description for your client, eg "SDK Test"
+  # Click "create"
+  # Get ready to use your Client Id and secret
+
+# SET YOUR CLIENT ID AND SECRET IN BASH
+CLIENT_ID=
+CLIENT_SECRET=
+
+# GET YOUR DOMO API OAUTH ACCESS TOKEN
+http --body https://api.domo.com/oauth/token grant_type==client_credentials scope=="data user" -a $CLIENT_ID:$CLIENT_SECRET
+
+# SET YOUR OAUTH TOKEN IN BASH
+ACCESS_TOKEN=
+
+# CREATE A STREAM DATASET
+echo '{
+  "dataSet" : {
+    "name" : "Leonhard Euler Party",
+    "description" : "Mathematician Guest List",
+    "schema" : {
+      "columns" : [ {
+        "type" : "STRING",
+        "name" : "Friend"
+      }, {
+        "type" : "STRING",
+        "name" : "Attending"
+      } ]
+    }
+  },
+  "updateMethod" : "APPEND"
+}' | http POST https://api.domo.com/v1/streams Content-Type:application/json Accept:application/json Authorization:"bearer $ACCESS_TOKEN"
+
+# SET YOUR STREAM ID IN BASH
+STREAM_ID=
+
+# CREATE A STREAM EXECUTION
+http POST https://api.domo.com/v1/streams/$STREAM_ID/executions Content-Type:application/json Accept:application/json Authorization:"bearer $ACCESS_TOKEN"
+
+# UPLOAD A DATA PART
+echo '"Pythagoras","FALSE"
+"Alan Turing","TRUE"
+"George Boole","TRUE"' | http PUT https://api.domo.com/v1/streams/$STREAM_ID/executions/1/part/1 Content-Type:text/csv Accept:application/json Authorization:"bearer $ACCESS_TOKEN"
+
+# COMMIT THE EXECUTION
+http PUT https://api.domo.com/v1/streams/$STREAM_ID/executions/1/commit Accept:application/json Authorization:"bearer $ACCESS_TOKEN"
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# ALL STREAM API COMMANDS:
+
 # CREATE A STREAM
-STREAM=`echo '{ "updateMethod": "REPLACE", "dataSet": {"name": "Smoke Test DataSet", "description": "Such dataset.", "schema": {"columns": [{"type": "STRING", "name":"name"}]}}}' \
- | http --body POST https://api.dev.domo.com/v1/streams Authorization:"bearer $ACCESS_TOKEN" | jq -r '.id'`
+STREAM_ID=`echo '{
+  "dataSet" : {
+    "name" : "Leonhard Euler Party",
+    "description" : "Mathematician Guest List",
+    "schema" : {
+      "columns" : [ {
+        "type" : "STRING",
+        "name" : "Friend"
+      }, {
+        "type" : "STRING",
+        "name" : "Attending"
+      } ]
+    }
+  },
+  "updateMethod" : "APPEND"
+}'| http --body POST https://api.domo.com/v1/streams Authorization:"bearer $ACCESS_TOKEN" | jq -r '.id'`
 
 
 # GET A STREAM
-http -v https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+http -v https://api.domo.com/v1/streams/$STREAM_ID Authorization:"bearer $ACCESS_TOKEN"
 
 
 # UPDATE A STREAM
 echo '{ "updateMethod": "APPEND", "dataSet": {"name": "Smoke Test DataSet", "description": "Such dataset.", "schema": {"columns": [{"type": "STRING", "name":"name"}]}}}' \
-  | http -v PUT https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+  | http -v PUT https://api.domo.com/v1/streams/$STREAM_ID Authorization:"bearer $ACCESS_TOKEN"
 
 
 # PATCH A STREAM
-echo '{ "updateMethod": "REPLACE" }' \
-   | http -v PATCH https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+echo '{ "updateMethod": "REPLACE" }'| http -v PATCH https://api.domo.com/v1/streams/$STREAM_ID Authorization:"bearer $ACCESS_TOKEN"
 
 
 # CREATE AN EXECUTION
-EXECUTION=`http --body POST $API_HOST/v1/streams/$STREAM/executions Authorization:"bearer $ACCESS_TOKEN" | jq -r '.id'`
+EXECUTION_ID=`http --body POST $API_HOST/v1/streams/$STREAM_ID/executions Authorization:"bearer $ACCESS_TOKEN" | jq -r '.id'`
 
 
 # GET AN EXECUTION
-http -v $API_HOST/v1/streams/$STREAM/executions/$EXECUTION Authorization:"bearer $ACCESS_TOKEN"
+http -v $API_HOST/v1/streams/$STREAM_ID/executions/$EXECUTION_ID Authorization:"bearer $ACCESS_TOKEN"
 
 
 # UPLOAD TEXT PART
-printf '"Obi-Wan"\n"Luke"\n"Leia"' \
-    | http -v PUT $API_HOST/v1/streams/$STREAM/executions/$EXECUTION/part/1 Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
+echo '"Obi-Wan"\n"Luke"\n"Leia"'| http -v PUT $API_HOST/v1/streams/$STREAM_ID/executions/$EXECUTION_ID/part/1 Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
 
 
 # GZIP UPLOAD PART
 printf '"Maul"\n"Vader"\n"Sidious"' \
-    | gzip -c | http -v PUT $API_HOST/v1/streams/$STREAM/executions/$EXECUTION/part/2 Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
+    | gzip -c | http -v PUT $API_HOST/v1/streams/$STREAM_ID/executions/$EXECUTION_ID/part/2 Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN"
 
 
 # COMMIT AN EXECUTION
-http -v PUT $API_HOST/v1/streams/$STREAM/executions/$EXECUTION/commit Authorization:"bearer $ACCESS_TOKEN"
+http -v PUT $API_HOST/v1/streams/$STREAM_ID/executions/$EXECUTION_ID/commit Authorization:"bearer $ACCESS_TOKEN"
 
 
 # DELETE A STREAM
-http -v DELETE https://api.dev.domo.com/v1/streams/$STREAM Authorization:"bearer $ACCESS_TOKEN"
+http -v DELETE https://api.domo.com/v1/streams/$STREAM_ID Authorization:"bearer $ACCESS_TOKEN"
 
 
 # LIST
-http -v https://api.dev.domo.com/v1/streams Authorization:"bearer $ACCESS_TOKEN"
+http -v https://api.domo.com/v1/streams Authorization:"bearer $ACCESS_TOKEN"

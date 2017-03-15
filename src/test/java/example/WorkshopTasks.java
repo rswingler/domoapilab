@@ -7,6 +7,10 @@ import com.domo.sdk.datasets.model.CreateDataSetRequest;
 import com.domo.sdk.datasets.model.DataSet;
 import com.domo.sdk.datasets.model.Schema;
 import com.domo.sdk.request.Config;
+import com.domo.sdk.streams.model.StreamDataSet;
+import com.domo.sdk.streams.model.StreamDataSetRequest;
+import com.domo.sdk.streams.model.StreamExecution;
+import com.domo.sdk.streams.model.StreamUploadMethod;
 import com.domo.sdk.users.UserClient;
 import com.domo.sdk.users.model.User;
 import com.opencsv.CSVReader;
@@ -20,12 +24,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.domo.sdk.datasets.model.ColumnType.LONG;
 import static com.domo.sdk.datasets.model.ColumnType.STRING;
@@ -136,13 +143,77 @@ public class WorkshopTasks {
 
     }
 
+    @Test
+    public void streamExample_starWarsCsv() throws Exception {
+        //Build the client config
+        Config myConf = Config.with()
+                .clientId("04d58893-4b57-4061-823d-2e46a8fa0e07")
+                .clientSecret("1649ef2fc203cc1fea92e6e54b632117acce03430c278ac7c28decba612eca65")
+                .apiHost("api.domo.com")
+                .useHttps(true)
+                .scope(USER, DATA)
+                .httpLoggingLevel(HttpLoggingInterceptor.Level.BODY)
+                .build();
 
+        //Create the Domo API Client
+        Client domo = Client.create(myConf);
 
+        //Build the DataSet request object
+        CreateDataSetRequest ds = new CreateDataSetRequest();
+        ds.setName("Star Wars Planets");
+        ds.setDescription("Every planet from the Star Wars movies, books, and shows");
 
+        //Populate the DataSet schema
+        List<Column> columns = new ArrayList<>();
+        columns.add(new Column(STRING, "Planet Name"));
+        columns.add(new Column(STRING, "Position"));
+        columns.add(new Column(STRING, "System"));
+        columns.add(new Column(STRING, "Sector"));
+        columns.add(new Column(STRING, "Planet Type"));
+        columns.add(new Column(STRING, "Environment"));
+        columns.add(new Column(STRING, "Length of Day"));
+        columns.add(new Column(STRING, "Length of Year"));
+        columns.add(new Column(STRING, "Sentient Species"));
+        columns.add(new Column(STRING, "Other Species"));
+        columns.add(new Column(STRING, "Capital City"));
+        columns.add(new Column(STRING, "Region"));
+        columns.add(new Column(STRING, "World"));
+        columns.add(new Column(STRING, "Atmosphere"));
+        columns.add(new Column(STRING, "Gravity"));
+        columns.add(new Column(STRING, "Diameter"));
+
+        Schema schema = new Schema(columns);
+        ds.setSchema(schema);
+
+        //Build the Stream request object
+        StreamDataSetRequest streamRequest = new StreamDataSetRequest();
+        streamRequest.setDataset(ds);
+        streamRequest.setUpdateMethod(StreamUploadMethod.APPEND);
+
+        //Create the Stream DataSet in Domo
+        StreamDataSet stream = domo.streamDataSetClient().createStreamDataset(streamRequest);
+
+        //Create a Stream Execution to begin a multi-part upload
+        StreamExecution execution = domo.streamDataSetClient().createStreamExecution(stream.getId());
+
+        //Get the current path of the working directory, or the path to your csv files
+        String currentPath = Paths.get("").toAbsolutePath().toString();
+
+        //Begin uploading your data in parts - the Star Wars dataset has 26 files
+        for (int i = 0; i < 26; i++){
+            int partNum = i + 1;
+            System.out.println("Uploading part: " + partNum);
+            File part = new File(currentPath + "/datasets/starwars/planets" + partNum + ".csv");
+            domo.streamDataSetClient().uploadDataPart(stream.getId(), execution.getId(), partNum, part);
+        }
+
+        //Commit the execution to mark the upload as completed
+        domo.streamDataSetClient().commitStreamExecution(stream.getId(), execution.getId());
+    }
 
 
     @Test
-    public void sqliteExample() throws Exception {
+    public void pokemonSQLiteExample() throws Exception {
         File csvFile = File.createTempFile("pokemon",".csv");
         System.out.println(csvFile.getAbsolutePath());
 

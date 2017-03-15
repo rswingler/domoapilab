@@ -3,3 +3,5 @@
 
 build/
 .gradle/
+domoapilab.ipr
+domoapilab.iws
