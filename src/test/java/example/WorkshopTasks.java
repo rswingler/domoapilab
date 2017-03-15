@@ -145,18 +145,6 @@ public class WorkshopTasks {
 
     @Test
     public void streamExample_starWarsCsv() throws Exception {
-        //Build the client config
-        Config myConf = Config.with()
-                .clientId("04d58893-4b57-4061-823d-2e46a8fa0e07")
-                .clientSecret("1649ef2fc203cc1fea92e6e54b632117acce03430c278ac7c28decba612eca65")
-                .apiHost("api.domo.com")
-                .useHttps(true)
-                .scope(USER, DATA)
-                .httpLoggingLevel(HttpLoggingInterceptor.Level.BODY)
-                .build();
-
-        //Create the Domo API Client
-        Client domo = Client.create(myConf);
 
         //Build the DataSet request object
         CreateDataSetRequest ds = new CreateDataSetRequest();
@@ -191,10 +179,10 @@ public class WorkshopTasks {
         streamRequest.setUpdateMethod(StreamUploadMethod.APPEND);
 
         //Create the Stream DataSet in Domo
-        StreamDataSet stream = domo.streamDataSetClient().createStreamDataset(streamRequest);
+        StreamDataSet stream = client.streamDataSetClient().createStreamDataset(streamRequest);
 
         //Create a Stream Execution to begin a multi-part upload
-        StreamExecution execution = domo.streamDataSetClient().createStreamExecution(stream.getId());
+        StreamExecution execution = client.streamDataSetClient().createStreamExecution(stream.getId());
 
         //Get the current path of the working directory, or the path to your csv files
         String currentPath = Paths.get("").toAbsolutePath().toString();
@@ -204,11 +192,11 @@ public class WorkshopTasks {
             int partNum = i + 1;
             System.out.println("Uploading part: " + partNum);
             File part = new File(currentPath + "/datasets/starwars/planets" + partNum + ".csv");
-            domo.streamDataSetClient().uploadDataPart(stream.getId(), execution.getId(), partNum, part);
+            client.streamDataSetClient().uploadDataPart(stream.getId(), execution.getId(), partNum, part);
         }
 
         //Commit the execution to mark the upload as completed
-        domo.streamDataSetClient().commitStreamExecution(stream.getId(), execution.getId());
+        client.streamDataSetClient().commitStreamExecution(stream.getId(), execution.getId());
     }
 
 
