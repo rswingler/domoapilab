@@ -184,15 +184,17 @@ public class WorkshopTasks {
         //Create a Stream Execution to begin a multi-part upload
         StreamExecution execution = client.streamDataSetClient().createStreamExecution(stream.getId());
 
-        //Get the current path of the working directory, or the path to your csv files
-        String currentPath = Paths.get("").toAbsolutePath().toString();
-
-        //Begin uploading your data in parts - the Star Wars dataset has 26 files
-        for (int i = 0; i < 26; i++){
-            int partNum = i + 1;
-            System.out.println("Uploading part: " + partNum);
-            File part = new File(currentPath + "/datasets/starwars/planets" + partNum + ".csv");
-            client.streamDataSetClient().uploadDataPart(stream.getId(), execution.getId(), partNum, part);
+        //Get the current path of the parts to upload
+        File csvDirectory = new File("datasets/starwars");
+        int partNum = 1;
+        if(csvDirectory.isDirectory()){
+            //noinspection ConstantConditions
+            for(String path:csvDirectory.list()) {
+                System.out.println("Uploading part: " + csvDirectory.getAbsolutePath()+"/"+ path);
+                File part = new File(csvDirectory, path);
+                client.streamDataSetClient().uploadDataPart(stream.getId(), execution.getId(), partNum, part);
+                partNum++;
+            }
         }
 
         //Commit the execution to mark the upload as completed
