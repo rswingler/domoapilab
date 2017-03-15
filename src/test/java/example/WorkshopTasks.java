@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -99,7 +98,7 @@ public class WorkshopTasks {
     @Test
     public void heroCsv() throws Exception {
         //Read and filter CSV
-        CSVReader reader = new CSVReader(new FileReader("datasets/comicBooks/heroAndVillianStats.csv"));
+        CSVReader reader = new CSVReader(new FileReader("datasets/superHeroes/heroAndVillianStats.csv"));
 
         File csvFile = File.createTempFile("goodguys",".csv");
         System.out.println(csvFile.getAbsolutePath());
