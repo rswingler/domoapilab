@@ -34,7 +34,12 @@ echo '{ "name": "Sample Data", "description": "Just some data now with 3 columns
 
 ## Step 7 - Upload data
 
-echo '"a","b","c"\n"d","e","f"\n"g","h","i"\n"j","k","l"\n"m","n","o"\n"p","q","r"' \
+echo '"a","b","c"
+"d","e","f"
+"g","h","i"
+"j","k","l"
+"m","n","o"
+"p","q","r"' \
   | http -v PUT https://api.domo.com/v1/datasets/<dataset id>/data Content-Type:"text/csv" Authorization:"bearer $ACCESS_TOKEN" --pretty=format
 
 <pre>
