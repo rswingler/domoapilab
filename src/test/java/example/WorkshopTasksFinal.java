@@ -42,7 +42,7 @@ import static com.domo.sdk.request.Scope.USER;
  * Created by clintchecketts on 3/14/17.
  */
 @SuppressWarnings("Duplicates")
-public class WorkshopTasks {
+public class WorkshopTasksFinal {
 
     private Client client;
 
@@ -98,7 +98,7 @@ public class WorkshopTasks {
     @Test
     public void heroCsv() throws Exception {
         //Read and filter CSV
-        CSVReader reader = new CSVReader(new FileReader("datasets/superHeroes/heroAndVillianStats.csv"));
+        CSVReader reader = new CSVReader(new FileReader("datasets/comicBooks/heroAndVillianStats.csv"));
 
         File csvFile = File.createTempFile("goodguys",".csv");
         System.out.println(csvFile.getAbsolutePath());
@@ -137,7 +137,7 @@ public class WorkshopTasks {
         DataSet ds = dsClient.create(createRequest);
 
         //Import Data
-        //TODO Import Data Using DataSet Client
+        dsClient.importData(ds.getId(),csvFile);
 
 
     }
@@ -217,10 +217,19 @@ public class WorkshopTasks {
 
 
         //Create DS
-        //TODO Create Dataset with Correct Schema
+        DataSetClient dsClient = client.dataSetClient();
+
+        CreateDataSetRequest createRequest = new CreateDataSetRequest();
+        createRequest.setName("Pokemon!");
+        createRequest.setDescription("Pokemon Names");
+        createRequest.setSchema(new Schema(Lists.newArrayList(
+                new Column(LONG, "id"),
+                new Column(STRING, "name"))));
+
+        DataSet ds = dsClient.create(createRequest);
 
         //Import Data
-        //TODO Import Dataset from csvFile
+        dsClient.importData(ds.getId(),csvFile);
     }
 
 
